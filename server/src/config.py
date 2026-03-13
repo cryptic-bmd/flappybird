@@ -34,6 +34,7 @@ class ServerSettings(BaseSettings):
         return Environment(self.ENVIRONMENT)
 
     DOMAIN: str
+    FRONT_BASE_URL: str
 
     # Telegram
     TG_BOT_TOKEN: str
