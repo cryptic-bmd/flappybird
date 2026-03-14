@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 
 import { retrieveLaunchParams } from '@telegram-apps/sdk-react';
 
-import App from './App.tsx'
+import Root from './Root.tsx'
 import EnvUnsupported from './components/EnvUnsupported.tsx';
 import { init } from './init.ts';
 import { DEV } from './config.ts';
@@ -30,10 +30,10 @@ try {
       root.render(
         DEV ? (
           <StrictMode>
-            <App/>
+            <Root/>
           </StrictMode>
         ) : (
-          <App/>
+          <Root/>
         )
       );
     });
