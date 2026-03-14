@@ -1,9 +1,11 @@
-import asyncio, time
+import asyncio, random, time
+from typing import Tuple
 
 from socketio.async_server import AsyncServer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
+from src.crud import create_game
 from src.database import sessionmanager
 from src.enums import Events, GameStatus
 from src.logger import logger
@@ -13,6 +15,7 @@ from src.utils import broadcast
 class CrashGame:
     def __init__(self):
         self.state = GameStatus.BETTING
+        self.next_crash_point: float = 0
 
         # Maintenance
         self.maintenance_mode: bool = (
@@ -25,7 +28,34 @@ class CrashGame:
     def time_in_ms(self) -> int:
         return int((time.time() * 1000))
 
+    def generate_crash_point(self) -> Tuple[float, float]:
+        r = lambda: random.random()
+
+        def cp():
+            # Applies instant bust
+            if r() < settings.HOUSE_EDGE:
+                return 1.00
+            raw = 1 / (1 - r())
+            return round(max(1.0, raw * settings.PAYOUT_FACTOR), 2)
+
+        crash_point = cp() if self.next_crash_point == 0 else self.next_crash_point
+        next_crash_point = cp()
+
+        # logger.info(f"\nRandom number: {round(r, 2)}")
+        logger.info(f"Crash point: {crash_point}")
+        logger.info(f"Next crash point: {next_crash_point}\n")
+
+        return crash_point, next_crash_point
+
     async def _run(self, sio: AsyncServer, db: AsyncSession):
+        # Main game loop
+        self.crash_point, self.next_crash_point = self.generate_crash_point()
+        game = await create_game(db, self.crash_point)
+        self.game_id = game.id
+
+        logger.info(f"\nGame {game.id} started")
+        ...
+
         await asyncio.sleep(5)
 
     async def run(self, sio: AsyncServer):

@@ -32,3 +32,9 @@ class GameStatus(Enum):
     BETTING = "BETTING"
     RUNNING = "RUNNING"
     CRASHED = "CRASHED"
+
+
+class BetStatus(Enum):
+    ACTIVE = "ACTIVE"
+    CASHED_OUT = "CASHED_OUT"
+    LOST = "LOST"

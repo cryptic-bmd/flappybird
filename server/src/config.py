@@ -40,6 +40,7 @@ class ServerSettings(BaseSettings):
 
     # Websocket
     SIO_MODE: str = Field(default="asgi", pattern="^(asgi|wsgi)$")
+    SIO_MOUNTPOINT: str
 
     @computed_field
     @property
@@ -84,6 +85,8 @@ class ServerSettings(BaseSettings):
 
     # Game
     MAINTENANCE_MODE: bool
+    HOUSE_EDGE: float  # epsilon
+    PAYOUT_FACTOR: float
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

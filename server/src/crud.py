@@ -1,10 +1,12 @@
+import hashlib
 from typing import Optional
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from src.models import User
+from src.models import Game, User
+from src.utils import utcnow
 
 
 async def create_user(
@@ -57,3 +59,20 @@ async def get_or_create_user(
 async def get_user_by_id(db: AsyncSession, user_id: int) -> Optional[User]:
     result = await db.execute(select(User).where(User.id == user_id))
     return result.scalars().first()
+
+
+async def create_game(db: AsyncSession, crash_point: float) -> Game:
+    while True:
+        timestamp = utcnow().isoformat()
+        input_string = f"{crash_point}{timestamp}"
+        game_hash = hashlib.sha256(input_string.encode("utf-8")).hexdigest()
+
+        result = await db.execute(select(Game).where(Game.hash == game_hash))
+        if result.scalars().first() is None:
+            break
+
+    db_game = Game(hash=game_hash, crash_point=crash_point)
+    db.add(db_game)
+    await db.commit()
+    await db.refresh(db_game)
+    return db_game
