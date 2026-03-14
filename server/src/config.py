@@ -87,6 +87,7 @@ class ServerSettings(BaseSettings):
     MAINTENANCE_MODE: bool
     HOUSE_EDGE: float  # epsilon
     PAYOUT_FACTOR: float
+    BETTING_PHASE_DURATION: int
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

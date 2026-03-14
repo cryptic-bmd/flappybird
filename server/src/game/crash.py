@@ -1,5 +1,5 @@
 import asyncio, random, time
-from typing import Tuple
+from typing import Dict, Tuple
 
 from socketio.async_server import AsyncServer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,13 +9,21 @@ from src.crud import create_game
 from src.database import sessionmanager
 from src.enums import Events, GameStatus
 from src.logger import logger
+from src.schemas import BettedUserInfo, BettedUserStats, GameState
 from src.utils import broadcast
 
 
 class CrashGame:
     def __init__(self):
         self.state = GameStatus.BETTING
+        self.game_id = 0
+        self.current_multiplier = 1.0
+        self.crash_point: float = 0
         self.next_crash_point: float = 0
+        self.start_time_in_ms: int = 0
+
+        self.betted_user_infos: Dict[int, BettedUserInfo] = {}
+        self.betted_user_stats = BettedUserStats()
 
         # Maintenance
         self.maintenance_mode: bool = (
@@ -27,6 +35,10 @@ class CrashGame:
     @property
     def time_in_ms(self) -> int:
         return int((time.time() * 1000))
+
+    @property
+    def elapsed_time_ms(self) -> int:
+        return self.time_in_ms - self.start_time_in_ms
 
     def generate_crash_point(self) -> Tuple[float, float]:
         r = lambda: random.random()
@@ -54,9 +66,32 @@ class CrashGame:
         self.game_id = game.id
 
         logger.info(f"\nGame {game.id} started")
-        ...
 
-        await asyncio.sleep(5)
+        # BETTING phase - Users can now place their bets (in BETTING_PHASE_DURATION seconds)
+        self.state = GameStatus.BETTING
+        self.current_multiplier = 1.0
+        self.start_time_in_ms = self.time_in_ms
+
+        self.betted_user_infos = {}
+        self.betted_user_states = {}
+
+        self.betted_user_stats = BettedUserStats()
+        await broadcast(
+            sio,
+            Events.BETTED_USER_STATS.value,
+            self.betted_user_stats.json_(),
+        )
+        await broadcast(
+            sio,
+            Events.GAME_STATE.value,
+            GameState(
+                gameState=self.state.value,
+                currentMultiplier=self.current_multiplier,
+                serverTimeElapsed=self.elapsed_time_ms,
+            ).json_(),
+        )
+        await asyncio.sleep(settings.BETTING_PHASE_DURATION)
+        ...
 
     async def run(self, sio: AsyncServer):
         while True:
