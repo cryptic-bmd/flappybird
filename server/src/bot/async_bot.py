@@ -1,6 +1,6 @@
 import asyncio
 from functools import wraps
-from typing import Callable
+from typing import Callable, Optional
 
 from loguru import logger
 from telebot.async_telebot import AsyncTeleBot
@@ -39,6 +39,36 @@ asyncio.run(
 )
 
 
+async def get_referrer_id(message: Message) -> Optional[int]:
+    """
+    Extracts and validates the referrer_id from the message text. Expected format is "r-<id>".
+    Returns None if no valid referrer_id is found or if self-referral.
+    """
+    try:
+        if not message.text or not message.from_user:
+            return
+
+        parts = message.text.split(" ", maxsplit=1)
+        if len(parts) <= 1:
+            return
+
+        referral_arg = parts[1].strip()
+        if not referral_arg.startswith("r-"):
+            return
+
+        # Only accept "r-<digits>"
+        referral_id_str = referral_arg.replace("r-", "", 1)
+        if not referral_id_str.isdigit():
+            return
+
+        referral_id = int(referral_id_str)
+        # Prevent self-referral
+        if referral_id != message.from_user.id:
+            return referral_id
+    except Exception as e:
+        logger.exception(f"Failed to extract referrer_id: {e}")
+
+
 async def _ensure_user(
     func: Callable,
     message: Message,
@@ -59,6 +89,7 @@ async def _ensure_user(
         user = args[0]
         args = args[1:]
     else:
+        referrer_id = await get_referrer_id(message)
         async with sessionmanager.session() as db:
             # logger.info(f"with_wallets: {with_wallets}")
             user = await get_or_create_user(
@@ -66,6 +97,7 @@ async def _ensure_user(
                 id=user_id,
                 first_name=message.from_user.first_name,
                 username=message.from_user.username,
+                referrer_id=referrer_id,
             )
 
     if not user:

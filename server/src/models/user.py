@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import Optional
 
-from sqlalchemy import BigInteger, DateTime, Float, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.utils import utcnow
-from src.models import Base, user_table_name
+from src.models import Base, Referral, user_table_name
 
 
 class User(Base):
@@ -21,4 +21,13 @@ class User(Base):
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, onupdate=utcnow
+    )
+
+    referral_entry: Mapped[Referral] = relationship(
+        back_populates="referred",
+        foreign_keys="[Referral.referred_id]",
+    )
+    referrals: Mapped[list[Referral]] = relationship(
+        back_populates="referrer",
+        foreign_keys="[Referral.referrer_id]",
     )

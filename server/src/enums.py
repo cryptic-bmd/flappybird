@@ -38,3 +38,10 @@ class BetStatus(Enum):
     ACTIVE = "ACTIVE"
     CASHED_OUT = "CASHED_OUT"
     LOST = "LOST"
+
+
+class ReferralStatus(Enum):
+    PENDING = "pending"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"

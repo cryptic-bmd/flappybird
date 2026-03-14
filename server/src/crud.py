@@ -5,7 +5,7 @@ from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from src.models import Game, User
+from src.models import Game, Referral, User
 from src.utils import utcnow
 
 
@@ -33,6 +33,7 @@ async def get_or_create_user(
     first_name: str,
     username: Optional[str] = None,
     balance: float = 0,
+    referrer_id: Optional[int] = None,
 ) -> Optional[User]:
     user = await get_user_by_id(db, id)
     if user:
@@ -52,6 +53,9 @@ async def get_or_create_user(
     if not user:
         logger.error(f"User does not exist: {id}")
         raise ValueError("User does not exist")
+
+    if referrer_id:
+        await add_referral(db, id, referrer_id, first_name, user)
 
     return user
 
@@ -76,3 +80,45 @@ async def create_game(db: AsyncSession, crash_point: float) -> Game:
     await db.commit()
     await db.refresh(db_game)
     return db_game
+
+
+async def add_referral(
+    db: AsyncSession,
+    user_id: int,
+    referrer_id: int,
+    first_name: str,
+    user: Optional[User] = None,
+) -> Optional[Referral]:
+    if not user:
+        user = await get_user_by_id(db, user_id)
+        if not user:
+            return
+
+    referrer = await get_user_by_id(db, referrer_id)
+    if not referrer:
+        return
+
+    # This prevent self-referral
+    if user_id == referrer_id:
+        return
+
+    # This prevent double referral
+    result = await db.execute(
+        select(Referral).where(
+            Referral.referred_id == user_id, Referral.referrer_id == referrer_id
+        )
+    )
+    if result.scalars().first():
+        return
+
+    referral = Referral(
+        referred_id=user_id,
+        referrer_id=referrer_id,
+        referred_name=first_name,
+        referred=user,
+        referrer=referrer,
+    )
+    db.add(referral)
+    await db.commit()
+    await db.refresh(referral)
+    return referral
