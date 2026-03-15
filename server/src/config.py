@@ -1,5 +1,5 @@
 import os
-from typing import List, Union
+from typing import List, Optional, Union
 import warnings
 from pathlib import Path
 
@@ -34,9 +34,24 @@ class ServerSettings(BaseSettings):
     def ENVIRONMENT_(self) -> Environment:
         return Environment(self.ENVIRONMENT)
 
+    # Web
     DOMAIN: str
     FRONT_BASE_URL: str
     BACK_BASE_URL: str
+
+    @computed_field
+    @property
+    def SSL_CERT(self) -> Optional[str]:
+        if self.ENVIRONMENT_ != Environment.LOCAL:
+            return None
+        return os.path.join(SERVER_DIR, f"cert/{self.DOMAIN}.crt")
+
+    @computed_field
+    @property
+    def SSL_KEY(self) -> Optional[str]:
+        if self.ENVIRONMENT_ != Environment.LOCAL:
+            return None
+        return os.path.join(SERVER_DIR, f"cert/{self.DOMAIN}.key")
 
     # Websocket
     SIO_MODE: str = Field(default="asgi", pattern="^(asgi|wsgi)$")
