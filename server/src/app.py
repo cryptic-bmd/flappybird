@@ -2,12 +2,14 @@ import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from starlette.middleware.cors import CORSMiddleware
 
 from src.bot import async_bot
 from src.bot.handlers import *
 from src.config import settings
 from src.database import sessionmanager
 from src.game import crash_game
+from src.middlewares import *
 from src.sio_utils import sio, socketio_app
 
 
@@ -27,5 +29,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title=settings.PROJECT_NAME, lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=["*"],
+    allow_origins=[settings.FRONT_BASE_URL],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(MaintenanceMiddleware)
 
 app.mount(settings.SIO_MOUNTPOINT, socketio_app)
