@@ -24,10 +24,10 @@ class User(Base):
     )
 
     referral_entry: Mapped[Referral] = relationship(
-        back_populates="referred",
+        back_populates="referred",  # "referred" refers to this User
         foreign_keys="[Referral.referred_id]",
     )
     referrals: Mapped[list[Referral]] = relationship(
-        back_populates="referrer",
+        back_populates="referrer",  # likewise "referrer"
         foreign_keys="[Referral.referrer_id]",
     )
