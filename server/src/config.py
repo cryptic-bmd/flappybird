@@ -63,6 +63,7 @@ class ServerSettings(BaseSettings):
         return [self.FRONT_BASE_URL, self.BACK_BASE_URL]
 
     # Security
+    ADMIN_KEY: str
     SECRET_KEY: str
     ALGORITHM: str = "HS256"
 

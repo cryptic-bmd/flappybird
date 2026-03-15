@@ -15,4 +15,5 @@ dependencies = [
     "pytelegrambotapi>=4.32.0",
     "python-socketio>=5.16.1",
     "sqlalchemy>=2.0.48",
+    "telegram-webapp-auth>=3.0.7",
 ]

@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from src.api import routers
 from src.bot import async_bot
 from src.bot.handlers import *
 from src.config import settings
@@ -39,5 +40,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(MaintenanceMiddleware)
+
+for router in routers.all_:
+    app.include_router(router)
 
 app.mount(settings.SIO_MOUNTPOINT, socketio_app)

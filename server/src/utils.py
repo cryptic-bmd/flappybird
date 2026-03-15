@@ -20,6 +20,10 @@ async def inject_db_func(sio, async_handler, *args, **kwargs):
         await async_handler(sio, *args, **kwargs)
 
 
+def get_admin_key_from_token(token: str) -> str:
+    return get_str_from_token(token)
+
+
 def get_current_user_id_from_token(token: str) -> str:
     return get_str_from_token(token)
 
