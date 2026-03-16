@@ -71,6 +71,14 @@ class ServerSettings(BaseSettings):
     TG_BOT_TOKEN: str
 
     # Database
+    REDIS_HOST: str
+    REDIS_PORT: str
+
+    @computed_field
+    @property
+    def REDIS_URL(self) -> str:
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
+
     POSTGRES_USER: str
     POSTGRES_PASSWORD: str
     POSTGRES_HOST: str
