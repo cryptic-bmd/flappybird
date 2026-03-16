@@ -1,5 +1,5 @@
 import asyncio, random, time
-from typing import Dict, Tuple
+from typing import Dict
 
 from socketio.async_server import AsyncServer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -19,7 +19,6 @@ class CrashGame:
         self.game_id = 0
         self.current_multiplier = 1.0
         self.crash_point: float = 0
-        self.next_crash_point: float = 0
         self.start_time_in_ms: int = 0
 
         self.betted_user_infos: Dict[int, BettedUserInfo] = {}
@@ -29,18 +28,18 @@ class CrashGame:
         self.maintenance_mode: bool = (
             settings.MAINTENANCE_MODE
         )  # Runtime maintenance flag
-        self.m_last_update_ms = 0
-        self.m_update_interval_ms = 0
+        self.m_last_update_in_ms = 0
+        self.m_update_interval_in_ms = 0
 
     @property
     def time_in_ms(self) -> int:
         return int((time.time() * 1000))
 
     @property
-    def elapsed_time_ms(self) -> int:
+    def elapsed_time_in_ms(self) -> int:
         return self.time_in_ms - self.start_time_in_ms
 
-    def generate_crash_point(self) -> Tuple[float, float]:
+    def generate_crash_point(self) -> float:
         r = lambda: random.random()
 
         def cp():
@@ -50,18 +49,15 @@ class CrashGame:
             raw = 1 / (1 - r())
             return round(max(1.0, raw * settings.PAYOUT_FACTOR), 2)
 
-        crash_point = cp() if self.next_crash_point == 0 else self.next_crash_point
-        next_crash_point = cp()
-
+        crash_point = cp()
         # logger.info(f"\nRandom number: {round(r, 2)}")
         logger.info(f"Crash point: {crash_point}")
-        logger.info(f"Next crash point: {next_crash_point}\n")
 
-        return crash_point, next_crash_point
+        return crash_point
 
     async def _run(self, sio: AsyncServer, db: AsyncSession):
         # Main game loop
-        self.crash_point, self.next_crash_point = self.generate_crash_point()
+        self.crash_point = self.generate_crash_point()
         game = await create_game(db, self.crash_point)
         self.game_id = game.id
 
@@ -87,7 +83,7 @@ class CrashGame:
             GameState(
                 gameState=self.state.value,
                 currentMultiplier=self.current_multiplier,
-                serverTimeElapsed=self.elapsed_time_ms,
+                serverTimeElapsed=self.elapsed_time_in_ms,
             ).json_(),
         )
         await asyncio.sleep(settings.BETTING_PHASE_DURATION)
@@ -111,7 +107,9 @@ class CrashGame:
         # Check for maintenance mode first before starting a new game session
         if self.maintenance_mode:
             logger.info("Maintenance mode enabled")
-            if (self.time_in_ms - self.m_last_update_ms) < self.m_update_interval_ms:
+            if (
+                self.time_in_ms - self.m_last_update_in_ms
+            ) < self.m_update_interval_in_ms:
                 await asyncio.sleep(5)
                 return True
             # In maintenance mode, pause game loop and notify clients
@@ -120,12 +118,14 @@ class CrashGame:
                 Events.MAINTENANCE.value,
                 {"message": "Server is under maintenance. Betting is disabled."},
             )
-            self.m_update_interval_ms += min(self.m_update_interval_ms + 5000, 60000)
-            self.m_last_update_ms = self.time_in_ms
+            self.m_update_interval_in_ms += min(
+                self.m_update_interval_in_ms + 5000, 60000
+            )
+            self.m_last_update_in_ms = self.time_in_ms
             await asyncio.sleep(5)
             return True
         else:
-            self.m_update_interval_ms = 0
-            self.m_last_update_ms = 0
+            self.m_update_interval_in_ms = 0
+            self.m_last_update_in_ms = 0
 
         return False
