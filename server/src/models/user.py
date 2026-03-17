@@ -18,6 +18,17 @@ class User(Base):
     sid: Mapped[Optional[str]] = mapped_column(String, index=True)
 
     balance: Mapped[float] = mapped_column(Float, default=0.0, index=True)
+    # Newly added funds on chain or via a payment method that's
+    # not yet added to the main balance.
+    # This is to avoid a race condition when the balance is updated
+    # since the user can place a bet when/before the balance is updated
+    pending_balance: Mapped[float] = mapped_column(
+        Float, default=0.0, server_default="0.0", index=True
+    )
+    # Bonus balances that have not been wagered
+    unwagered_balance: Mapped[float] = mapped_column(
+        Float, default=0.0, server_default="0.0", index=True
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow

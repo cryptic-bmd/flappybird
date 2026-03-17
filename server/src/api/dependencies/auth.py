@@ -12,7 +12,7 @@ from telegram_webapp_auth.auth import (
 from telegram_webapp_auth.errors import InvalidInitDataError
 
 from src.config import settings
-from src.utils import get_admin_key_from_token
+from src.utils import get_admin_key_from_token, get_current_user_id_from_token
 
 authentication_schema = HTTPBearer()
 
@@ -55,3 +55,11 @@ def get_admin_key(
 ) -> str:
     admin_key = admin_key_cred.credentials
     return get_admin_key_from_token(admin_key)
+
+
+def get_current_user_id(
+    token_auth_cred: HTTPAuthorizationCredentials = Depends(authentication_schema),
+) -> str:
+    token = token_auth_cred.credentials
+    # logger.info(f"Token: {token}")
+    return get_current_user_id_from_token(token)
