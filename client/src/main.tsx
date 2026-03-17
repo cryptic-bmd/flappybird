@@ -8,9 +8,9 @@ import EnvUnsupported from './components/EnvUnsupported.tsx';
 import { init } from './init.ts';
 import { DEV } from './config.ts';
 
-import './index.css'
 // Include Telegram UI styles first to allow our code override the package CSS.
 import '@telegram-apps/telegram-ui/dist/styles.css';
+import './index.css'
 
 
 const root = createRoot(document.getElementById('root')!);
