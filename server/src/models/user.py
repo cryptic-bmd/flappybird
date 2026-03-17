@@ -1,11 +1,11 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
-from sqlalchemy import BigInteger, Boolean, DateTime, Float, String
+from sqlalchemy import BigInteger, DateTime, Float, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.utils import utcnow
-from src.models import Base, Referral, user_table_name
+from src.models import Base, BetSide, Referral, user_table_name
 
 
 class User(Base):
@@ -13,6 +13,9 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
     username: Mapped[Optional[str]] = mapped_column(String, index=True)
+
+    # Websocket
+    sid: Mapped[Optional[str]] = mapped_column(String, index=True)
 
     balance: Mapped[float] = mapped_column(Float, default=0.0, index=True)
 
@@ -31,3 +34,5 @@ class User(Base):
         back_populates="referrer",  # likewise "referrer"
         foreign_keys="[Referral.referrer_id]",
     )
+
+    betsides: Mapped[List[BetSide]] = relationship("BetSide", back_populates="user")

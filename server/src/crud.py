@@ -1,11 +1,13 @@
 import hashlib
-from typing import Optional
+from typing import Optional, Sequence
 
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import joinedload
 
-from src.models import Game, Referral, User
+from src.enums import GameStatus
+from src.models import BetSide, Game, Referral, User
 from src.utils import utcnow
 
 
@@ -16,10 +18,12 @@ async def create_user(
     balance: float = 0,
 ) -> Optional[User]:
 
+    betside = BetSide(user_id=id, side_name="f")
     user = User(
         id=id,
         username=username,
         balance=balance,
+        betsides=[betside],
     )
 
     db.add(user)
@@ -122,3 +126,29 @@ async def add_referral(
     await db.commit()
     await db.refresh(referral)
     return referral
+
+
+async def update_user_sid(db: AsyncSession, user: User, sid: str) -> User:
+    user.sid = sid
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+async def get_finalized_games(db: AsyncSession, limit: int = 50) -> Sequence[Game]:
+    result = await db.execute(
+        select(Game)
+        .where(Game.status == GameStatus.CRASHED.value)
+        .order_by(Game.created_at.desc())
+        .limit(limit)
+    )
+    return result.scalars().all()
+
+
+async def get_user_by_id_with_betsides(
+    db: AsyncSession, user_id: int
+) -> Optional[User]:
+    result = await db.execute(
+        select(User).options(joinedload(User.betsides)).where(User.id == user_id)
+    )
+    return result.scalars().first()

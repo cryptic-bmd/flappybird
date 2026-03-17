@@ -4,12 +4,18 @@ from src.enums import Events, GameStatus
 from src.game import crash_game
 from src.utils import get_current_user_id_from_token
 from src.sio_utils.base import BaseSocket
+from src.sio_utils.event_handlers import *
 
 
 class ExtendedSocket(BaseSocket):
     def __init__(self):
         super().__init__()
         sio = self.sio
+
+        @sio.on(Events.ENTER_ROOM.value)  # type: ignore
+        async def enter_room(sid, data):
+            logger.info(f"{sid} entered room")
+            await self.handle_event(enter_room_handler, sid, data)
 
         @sio.on(Events.PING.value)  # type: ignore
         async def ping(sid):

@@ -1,5 +1,5 @@
 import asyncio, random, time
-from typing import Dict
+from typing import Dict, Set
 
 from socketio.async_server import AsyncServer
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +9,7 @@ from src.crud import create_game
 from src.database import sessionmanager
 from src.enums import Events, GameStatus
 from src.logger import logger
-from src.schemas import BettedUserInfo, BettedUserStats, GameState
+from src.schemas import BetState, BettedUserInfo, BettedUserStats, GameState
 from src.utils import broadcast
 
 
@@ -22,7 +22,12 @@ class CrashGame:
         self.start_time_in_ms: int = 0
 
         self.betted_user_infos: Dict[int, BettedUserInfo] = {}
+        self.betted_user_states: Dict[int, BetState] = {}
         self.betted_user_stats = BettedUserStats()
+
+        # Track current game state-changing callback invokers
+        # This is to prevent users from, for example, cashing out twice in a session
+        self.invokers: Set[int] = set()
 
         # Maintenance
         self.maintenance_mode: bool = (

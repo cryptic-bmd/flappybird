@@ -1,5 +1,7 @@
 from typing import Optional
 
+from pydantic import ConfigDict
+
 from src.schemas.base import SecondaryBase
 
 
@@ -33,3 +35,44 @@ class GameState(SecondaryBase):
 
 class MaintenanceRequest(SecondaryBase):
     maintenance_mode: bool
+
+
+class UserBase(SecondaryBase):
+    id: Optional[int] = None
+    username: Optional[str] = None
+    img: Optional[str] = None
+    f: Optional["BetSideSchema"] = None
+    s: Optional["BetSideSchema"] = None
+
+
+class UserSchema(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    balance: float
+    pendingBalance: Optional[float] = None
+    availableBalance: Optional[float] = None
+    referralLink: Optional[str] = None
+
+
+class BetState(SecondaryBase):
+    fBetted: bool = False
+    sBetted: bool = False
+    # f: Optional[dict] = None  # { betAmount, cashout }
+    # s: Optional[dict] = None
+
+
+class BetSideSchema(SecondaryBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    auto: bool = False
+    betted: bool = False
+    cashedOut: bool = False
+    cashOutAmount: float = 0  # Cashout amount in currency
+    betAmount: float = 1
+    target: float = 10  # Cash-out multiplier
+
+
+class GameHistory(SecondaryBase):
+    gameID: int
+    gameHash: str  # Unique hash for the game
+    crashPoint: float  # Multiplier at which the game ended
