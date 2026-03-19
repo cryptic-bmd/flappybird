@@ -38,7 +38,7 @@ const Root = () => {
     <ErrorBoundary fallback={ErrorBoundaryError}>
       <App />
       <ToastContainer
-        className="!w-[80%] !top-[1rem] !left-1/2 !-translate-x-1/2"
+        className="w-[80%]! top-4! left-1/2! -translate-x-1/2!"
         position="top-center"
         autoClose={5000}
         hideProgressBar={false}

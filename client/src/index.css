@@ -369,4 +369,223 @@
   .dialog-transparent-title .dialog-content {
     @apply -mt-safe-header pl-0 pr-0;
   }
+
+  .scroll-x {
+    @apply overflow-y-hidden overflow-x-auto overscroll-contain;
+  }
+
+  .scroll-y {
+    @apply overflow-y-auto overflow-x-hidden overscroll-contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .betslip .pop-content,
+  .scroll-container {
+    @apply flex-1 basis-0 grow shrink my-auto;
+  }
+  
+  .dialog-content > .scroll-container {
+    padding-bottom: calc(var(--spacing-safe-bottom) + 1rem);
+  }
+
+  .scroll-container {
+    @apply flex flex-col;
+    min-height: calc(100% + 1px);
+  }
+
+  .tabs-title {
+    @apply flex flex-none h-10 relative rounded-lg text-secondary;
+  }
+
+  .tabs-title:not([data-type]) {
+    @apply bg-[rgb(var(--color-tab_nopadding)/1)];
+  }
+
+  .latest-tabs {
+    @apply h-12 mt-3.5 float-none;
+  }
+
+  .hide-scroll {
+    @apply [scrollbar-width:none];
+  }
+
+  .tabs-title:not([data-type]) .tabs-btn {
+    @apply rounded-lg;
+  }
+
+  .latest-tabs > .tabs-btn {
+    @apply min-w-25 flex-auto px-3 py-1.5;
+  }
+
+  .tabs-btn[aria-selected="true"] {
+    @apply bg-tab_selected text-primary font-extrabold;
+  }
+
+  .btn-like {
+    @apply select-none touch-manipulation;
+  }
+
+  .tabs-btn {
+    @apply rounded-lg flex-1 self-stretch whitespace-nowrap px-2;
+  }
+
+  .tabs-content {
+    @apply bg-layer4 rounded-lg mt-2 flex flex-col;
+  }
+
+  .select-item[aria-selected="true"] {
+    @apply bg-layer4;
+  }
+
+  .select-item {
+    @apply w-full rounded-lg px-2 py-0 pl-3;
+  }
+
+  .select-item.radio:before {
+    @apply order-last ml-auto mr-0;
+  }
+
+  .radio, .checkbox {
+    @apply flex h-11 flex-none items-center;
+  }
+
+  .radio[aria-selected="true"]:before {
+    @apply border-[6px] border-brand;
+  }
+
+  .radio:before {
+    @apply block flex-none w-6 h-6 mr-2 rounded-full border-2 border-third transition-all duration-150 content-[""];
+  }
+}
+
+.sky {
+  /* background-color: black; */
+  perspective: 400px;
+  /* margin-top: 10px; */
+  filter: drop-shadow(0 75px 10px #00000040);
+}
+
+.sky div {
+  transform-style: preserve-3d;
+}
+
+.bird {
+  position: absolute;
+  top: 48%;
+  left: 45%;
+  z-index: -1;
+  transform: translate(-50%, -50%);
+  animation: flyingAnim 4s linear infinite;
+}
+
+@keyframes flyingAnim {
+  0% {
+    transform: rotateX(-120deg) rotateZ(0deg) rotateX(10deg) translateY(0);
+  }
+  50% {
+    transform: rotateX(-120deg) rotateZ(180deg) rotateX(10deg) translateY(0);
+  }
+  100% {
+    transform: rotateX(-120deg) rotateZ(360deg) rotateX(10deg) translateY(0);
+  }
+}
+
+.bird-body {
+  position: relative;
+  height: 40px;
+  width: 30px;
+  background: rgb(var(--layer5));
+  margin: auto;
+}
+
+.head {
+  position: absolute;
+  top: -30px;
+  border-left: 15px solid transparent;
+  border-bottom: 30px solid rgb(var(--layer6));
+  border-right: 15px solid transparent;
+  transform: rotateX(-20deg);
+  transform-origin: 50% 100%;
+}
+
+.left-wing {
+  position: absolute;
+  left: -30px;
+  height: 30px;
+  border-bottom: 10px solid transparent;
+  border-right: 30px solid rgb(var(--brand));
+  transform-origin: 100% 0;
+  animation: leftWingAnim 0.8s ease-in-out infinite alternate;
+}
+
+.left-top-wing {
+  position: absolute;
+  left: -30px;
+  border-bottom: 30px solid transparent;
+  border-right: 30px solid rgb(var(--brand_alt));
+  transform-origin: 100% 0;
+  animation: leftWingAnim 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes leftWingAnim {
+  0% {
+    transform: rotateY(-40deg);
+  }
+  100% {
+    transform: rotateY(40deg);
+  }
+}
+
+.right-wing {
+  position: absolute;
+  left: 30px;
+  height: 30px;
+  border-bottom: 10px solid transparent;
+  border-left: 30px solid rgb(var(--brand));
+  transform-origin: 0 0;
+  animation: rightWingAnim 0.8s ease-in-out infinite alternate;
+}
+
+.right-top-wing {
+  position: absolute;
+  border-bottom: 30px solid transparent;
+  border-left: 30px solid rgb(var(--brand_alt));
+  transform-origin: 0 0;
+  animation: rightWingAnim 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes rightWingAnim {
+  0% {
+    transform: rotateY(40deg);
+  }
+  100% {
+    transform: rotateY(-40deg);
+  }
+}
+
+.left-tail {
+  position: absolute;
+  top: 40px;
+  transform: rotateX(-20deg);
+  border-top: 40px solid rgb(var(--layer5));
+  border-right: 30px solid transparent;
+  transform-origin: 50% 0;
+}
+
+.right-tail {
+  position: absolute;
+  top: 40px;
+  transform: rotateX(-20deg);
+  border-top: 40px solid rgb(var(--layer6));
+  border-left: 30px solid transparent;
+  transform-origin: 50% 0;
+}
+
+@keyframes spin-fast {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin-fast {
+  animation: spin-fast 0.5s linear infinite;
 }
