@@ -7,7 +7,8 @@ from sqlalchemy.future import select
 from sqlalchemy.orm import joinedload
 
 from src.enums import GameStatus
-from src.models import BetSide, Game, Referral, User
+from src.models import Bet, BetSide, Game, Referral, User
+from src.schemas import BetSideSchema
 from src.utils import utcnow
 
 
@@ -152,3 +153,37 @@ async def get_user_by_id_with_betsides(
         select(User).options(joinedload(User.betsides)).where(User.id == user_id)
     )
     return result.scalars().first()
+
+
+async def update_game_status(db: AsyncSession, game: Game, status: GameStatus) -> Game:
+    game.status = status.value
+    await db.commit()
+    await db.refresh(game)
+    return game
+
+
+async def get_bets_by_game_id(db: AsyncSession, game_id: int) -> Sequence[Bet]:
+    result = await db.execute(select(Bet).where(Bet.game_id == game_id))
+    return result.scalars().all()
+
+
+async def update_user_betside(
+    db: AsyncSession, user: User, betside_data: BetSideSchema
+) -> Optional[User]:
+    if not hasattr(user, "betsides"):
+        logger.error(f"Betside attribute not found for user: {user.id}")
+        return None
+
+    if not isinstance(betside := user.betsides[0], BetSide):
+        logger.error(f"Betside not found for user: {user.id}")
+        return None
+
+    betside.auto = betside_data.auto
+    betside.betted = betside_data.betted
+    betside.cashed_out = betside_data.cashedOut
+    betside.cashout_amount = betside_data.cashOutAmount
+    betside.bet_amount = betside_data.betAmount
+    betside.target = betside_data.target
+    await db.commit()
+    await db.refresh(user)
+    return user

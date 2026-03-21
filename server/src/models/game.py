@@ -3,11 +3,11 @@ from datetime import datetime
 from typing import Optional
 
 from sqlalchemy import BigInteger, DateTime, Float, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.enums import GameStatus
 from src.utils import utcnow
-from src.models import Base, game_table_name
+from src.models import Base, Bet, game_table_name
 
 
 class Game(Base):
@@ -26,3 +26,5 @@ class Game(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=utcnow, onupdate=utcnow
     )
+
+    bets: Mapped[list["Bet"]] = relationship("Bet", back_populates="game")

@@ -5,7 +5,7 @@ from sqlalchemy import BigInteger, DateTime, Float, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.utils import utcnow
-from src.models import Base, BetSide, Referral, user_table_name
+from src.models import Base, Bet, BetSide, Referral, user_table_name
 
 
 class User(Base):
@@ -47,3 +47,4 @@ class User(Base):
     )
 
     betsides: Mapped[List[BetSide]] = relationship("BetSide", back_populates="user")
+    bets: Mapped[list[Bet]] = relationship("Bet", back_populates="user")

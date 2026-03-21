@@ -4,6 +4,19 @@ from pydantic import ConfigDict
 
 from src.schemas.base import SecondaryBase
 
+__all__ = [
+    "BettedUserInfo",
+    "BettedUserStats",
+    "GameState",
+    "MaintenanceRequest",
+    "UserBase",
+    "UserSchema",
+    "BetState",
+    "BetSideSchema",
+    "GameHistory",
+    "BetSchema",
+]
+
 
 class BettedUserInfo(SecondaryBase):
     userID: int
@@ -76,3 +89,12 @@ class GameHistory(SecondaryBase):
     gameID: int
     gameHash: str  # Unique hash for the game
     crashPoint: float  # Multiplier at which the game ended
+
+
+class BetSchema(SecondaryBase):
+    hash: str
+    betAmount: float
+    cashOutMultiplier: float
+    cashedOut: Optional[bool] = None
+    winnings: float
+    date: Optional[int] = None
