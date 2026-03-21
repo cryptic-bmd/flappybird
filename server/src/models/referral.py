@@ -9,7 +9,7 @@ from src.utils import utcnow
 from src.models import Base, referral_table_name, user_table_name
 
 if TYPE_CHECKING:
-    from src.models.user import User
+    from src.models import User
 
 
 class Referral(Base):

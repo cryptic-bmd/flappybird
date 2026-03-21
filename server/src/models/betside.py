@@ -8,7 +8,7 @@ from src.models import Base, betside_table_name, user_table_name
 from src.utils import utcnow
 
 if TYPE_CHECKING:
-    from src.models.user import User
+    from src.models import User
 
 
 class BetSide(Base):
