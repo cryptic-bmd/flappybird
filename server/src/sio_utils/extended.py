@@ -22,6 +22,14 @@ class ExtendedSocket(BaseSocket):
             # logger.info(f"{sid} pinged")
             await sio.emit(Events.PONG.value)
 
+        @sio.on(Events.PLACE_BET.value)  # type: ignore
+        async def place_bet(sid, data):
+            await self.handle_event(place_bet_handler, sid, data)
+
+        @sio.on(Events.CASH_OUT.value)  # type: ignore
+        async def cash_out(sid, data):
+            await self.handle_event(cash_out_handler, sid, data, inject_db=False)
+
     async def handle_event(self, async_handler, sid, data, inject_db=True):
         if crash_game.maintenance_mode and crash_game.state != GameStatus.RUNNING:
             await self.sio.emit(

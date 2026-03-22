@@ -187,3 +187,43 @@ async def update_user_betside(
     await db.commit()
     await db.refresh(user)
     return user
+
+
+async def create_bet(
+    db: AsyncSession,
+    user_id: int,
+    game_id: int,
+    amount: float,
+    auto_cashout: bool,
+    target: float,
+    refresh_with_user: bool = True,
+) -> Optional[Bet]:
+    while True:
+        timestamp = utcnow().isoformat()
+        input_string = f"{user_id}{game_id}{amount}{auto_cashout}{timestamp}"
+
+        bet_hash = hashlib.sha256(input_string.encode("utf-8")).hexdigest()
+
+        result = await db.execute(select(Bet).filter_by(hash=bet_hash))
+        if result.scalars().first() is None:
+            break
+
+    db_bet = Bet(
+        user_id=user_id,
+        game_id=game_id,
+        hash=bet_hash,
+        amount=amount,
+        auto_cashout=auto_cashout,
+        target=target,
+    )
+    db.add(db_bet)
+    await db.commit()
+
+    if refresh_with_user == True:
+        results = await db.execute(
+            select(Bet).options(joinedload(Bet.user)).where(Bet.id == db_bet.id)
+        )
+        db_bet = results.scalars().first()
+    else:
+        await db.refresh(db_bet)
+    return db_bet

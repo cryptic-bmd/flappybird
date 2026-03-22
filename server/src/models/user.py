@@ -16,6 +16,7 @@ class User(Base):
 
     # Websocket
     sid: Mapped[Optional[str]] = mapped_column(String, index=True)
+    hash: Mapped[Optional[str]] = mapped_column(String, unique=True, index=True)
 
     balance: Mapped[float] = mapped_column(Float, default=0.0, index=True)
     # Newly added funds on chain or via a payment method that's

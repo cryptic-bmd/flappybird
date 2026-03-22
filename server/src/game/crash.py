@@ -178,6 +178,17 @@ class CrashGame:
             to=sid,
         )
 
+    def update_betted_user_stats(self, user_store: UserStorage, winnings: float):
+        self.betted_user_stats.noOfCashouts += 1
+        self.betted_user_stats.totalWinnings += winnings
+        self.betted_user_stats.biggestWinning = max(
+            self.betted_user_stats.biggestWinning, winnings
+        )
+        if self.betted_user_stats.biggestWinning != winnings:
+            return
+        self.betted_user_stats.biggestWinnerID = user_store.id
+        self.betted_user_stats.biggestWinnerUsername = user_store.username
+
     async def _run(self, sio: AsyncServer, db: AsyncSession):
         # Main game loop
         self.crash_point = self.generate_crash_point()

@@ -1,7 +1,8 @@
 from typing import Optional
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 
+from src.config import settings
 from src.schemas.base import SecondaryBase
 
 __all__ = [
@@ -15,6 +16,8 @@ __all__ = [
     "BetSideSchema",
     "GameHistory",
     "BetSchema",
+    "BetBase",
+    "CashOutBase",
 ]
 
 
@@ -98,3 +101,35 @@ class BetSchema(SecondaryBase):
     cashedOut: Optional[bool] = None
     winnings: float
     date: Optional[int] = None
+
+
+class BetBase(SecondaryBase):
+    token: str
+    betAmount: float  # Bet amount
+    target: float  # Requested cash-out multiplier
+    type: str  # "f" or "s" from client
+    autoCashOut: bool  # True if auto cashout is enabled
+
+    @field_validator("betAmount")
+    def check_bet_amount(cls, v):
+        if v <= 0 or v > settings.MAX_BET:
+            raise ValueError("Invalid betAmount")
+        return v
+
+    @field_validator("type")
+    def check_type(cls, v):
+        if v not in ["f", "s"]:
+            raise ValueError("Invalid type")
+        return v
+
+    @field_validator("autoCashOut")
+    def check_auto_cashout(cls, v):
+        if not isinstance(v, bool):
+            raise ValueError("Invalid autoCashOut")
+        return v
+
+
+class CashOutBase(SecondaryBase):
+    type: str  # "f" or "s"
+    endTarget: Optional[float] = None  # Requested cash-out multiplier
+    # clientTime: int  # Client timestamp (ms)
