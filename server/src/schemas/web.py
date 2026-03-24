@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 
 from pydantic import ConfigDict, field_validator
@@ -18,6 +19,7 @@ __all__ = [
     "BetSchema",
     "BetBase",
     "CashOutBase",
+    "ReferralResponse",
 ]
 
 
@@ -133,3 +135,13 @@ class CashOutBase(SecondaryBase):
     type: str  # "f" or "s"
     endTarget: Optional[float] = None  # Requested cash-out multiplier
     # clientTime: int  # Client timestamp (ms)
+
+
+class ReferralResponse(SecondaryBase):
+    referredId: int
+    referredName: str
+    referrerId: Optional[int] = None
+    referrerName: Optional[str] = None
+    bonusAmount: float
+    status: str
+    createdAt: datetime

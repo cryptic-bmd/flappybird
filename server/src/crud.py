@@ -227,3 +227,27 @@ async def create_bet(
     else:
         await db.refresh(db_bet)
     return db_bet
+
+
+async def get_bets_by_user_id(
+    db: AsyncSession, user_id: int, order: str = "desc", limit: int = 20
+) -> Sequence[Bet]:
+    result = await db.execute(
+        select(Bet)
+        .where(Bet.user_id == user_id)
+        .order_by(Bet.created_at.desc() if order == "desc" else Bet.created_at.asc())
+        .limit(limit)
+    )
+    return result.scalars().all()
+
+
+async def get_referrals_by_referrer_id(
+    db: AsyncSession, user_id: int, limit: int = 100
+) -> Sequence[Referral]:
+    result = await db.execute(
+        select(Referral)
+        .where(Referral.referrer_id == user_id)
+        .order_by(Referral.created_at.desc())
+        .limit(limit)
+    )
+    return result.scalars().all()
