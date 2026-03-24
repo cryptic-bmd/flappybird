@@ -24,6 +24,7 @@ async def auth(
     first_name: str,
     username: Optional[str] = None,
     balance: float = 0,
+    is_bot: bool = False,
 ) -> str:
     user = await get_or_create_user(
         db=db,
@@ -31,6 +32,7 @@ async def auth(
         first_name=first_name,
         username=username or first_name,
         balance=balance,
+        is_bot=is_bot,
     )
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

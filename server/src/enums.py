@@ -45,3 +45,8 @@ class ReferralStatus(Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
+
+
+class BetSideType(Enum):
+    F = "f"
+    S = "s"

@@ -20,6 +20,7 @@ __all__ = [
     "BetBase",
     "CashOutBase",
     "ReferralResponse",
+    "BotUserDetails",
 ]
 
 
@@ -145,3 +146,10 @@ class ReferralResponse(SecondaryBase):
     bonusAmount: float
     status: str
     createdAt: datetime
+
+
+class BotUserDetails(SecondaryBase):
+    user_id: int
+    username: str
+    first_name: str
+    token: Optional[str] = None

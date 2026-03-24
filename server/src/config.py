@@ -38,6 +38,7 @@ class ServerSettings(BaseSettings):
     DOMAIN: str
     FRONT_BASE_URL: str
     BACK_BASE_URL: str
+    BACK_BASE_SOCKET_URL: str
 
     @computed_field
     @property

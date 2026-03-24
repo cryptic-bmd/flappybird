@@ -108,7 +108,7 @@ async def _place_bet(
         sid=sid,
         username=user.username or "",
         balance=user.balance,
-        is_bot=False,  # user.is_bot or False,
+        is_bot=user.is_bot or False,
         betsides=[BetSideStorage(**betside.__dict__) for betside in user.betsides],
         bet=None,
     )

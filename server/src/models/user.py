@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, DateTime, Float, String
+from sqlalchemy import BigInteger, Boolean, DateTime, Float, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.utils import utcnow
@@ -13,6 +13,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, index=True)
     username: Mapped[Optional[str]] = mapped_column(String, index=True)
+    is_bot: Mapped[Optional[bool]] = mapped_column(Boolean, index=True)
 
     # Websocket
     sid: Mapped[Optional[str]] = mapped_column(String, index=True)

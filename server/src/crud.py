@@ -15,18 +15,30 @@ from src.utils import utcnow
 async def create_user(
     db: AsyncSession,
     id: int,
+    sid: Optional[str] = None,
     username: Optional[str] = None,
     balance: float = 0,
+    is_bot: bool = False,
 ) -> Optional[User]:
+    while True:
+        timestamp = utcnow().isoformat()
+        input_string = f"{id}{sid}{username}{balance}{is_bot}{timestamp}"
+        user_hash = hashlib.sha256(input_string.encode("utf-8")).hexdigest()
+
+        result = await db.execute(select(User).filter_by(hash=user_hash))
+        if result.scalars().first() is None:
+            break
 
     betside = BetSide(user_id=id, side_name="f")
     user = User(
         id=id,
+        hash=user_hash,
+        sid=sid,
         username=username,
         balance=balance,
+        is_bot=is_bot,
         betsides=[betside],
     )
-
     db.add(user)
     await db.commit()
     return user
@@ -36,8 +48,10 @@ async def get_or_create_user(
     db: AsyncSession,
     id: int,
     first_name: str,
+    sid: Optional[str] = None,
     username: Optional[str] = None,
     balance: float = 0,
+    is_bot: bool = False,
     referrer_id: Optional[int] = None,
 ) -> Optional[User]:
     user = await get_user_by_id(db, id)
@@ -52,8 +66,10 @@ async def get_or_create_user(
     user = await create_user(
         db=db,
         id=id,
+        sid=sid,
         username=username or first_name,
         balance=balance,
+        is_bot=is_bot,
     )
     if not user:
         logger.error(f"User does not exist: {id}")
