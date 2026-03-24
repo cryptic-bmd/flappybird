@@ -1,5 +1,7 @@
 import BetControls from "./BetControls";
+import BetLog from "./BetLog";
 import CrashBanner from "./CrashBanner";
+import History from "./History";
 
 
 const CrashContent = () => {
@@ -18,7 +20,9 @@ const CrashContent = () => {
                 </div>
               </div>
             </div>
+            <BetLog />
           </div>
+          <History />
         </div>
       </div>
     </div>
